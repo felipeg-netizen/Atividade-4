@@ -7,7 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const mainNav = document.querySelector(".main-nav");
 
         if (menuToggle && mainNav) {
-            menuToggle.addEventListener("click", () => {
+            menuToggle.addEventListener("click", (e) => {
+                e.stopPropagation(); 
                 const isExpanded = menuToggle.getAttribute("aria-expanded") === "true";
                 menuToggle.setAttribute("aria-expanded", !isExpanded);
                 mainNav.classList.toggle("is-open");
@@ -46,16 +47,31 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function closeAllDropdowns(exceptThisOne) {
+        document.querySelectorAll(".dropdown-menu.is-open").forEach(menu => {
+            if (menu !== exceptThisOne) {
+                menu.classList.remove("is-open");
+                menu.previousElementSibling.setAttribute("aria-expanded", "false");
+            }
+        });
+    }
+
     function initDropdownNav() {
         document.querySelectorAll(".dropdown > a").forEach(dropdownToggle => {
             const dropdownMenu = dropdownToggle.nextElementSibling;
             
+            if (!dropdownMenu) return; 
+
             dropdownToggle.setAttribute("aria-haspopup", "true");
             dropdownToggle.setAttribute("aria-expanded", "false");
             
             dropdownToggle.addEventListener("click", (e) => {
                 e.preventDefault(); 
+                e.stopPropagation(); 
                 const isOpen = dropdownToggle.getAttribute("aria-expanded") === "true";
+                
+                closeAllDropdowns(dropdownMenu);
+
                 dropdownToggle.setAttribute("aria-expanded", !isOpen);
                 dropdownMenu.classList.toggle("is-open");
             });
@@ -74,14 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        document.addEventListener("click", (e) => {
-            if (!e.target.closest(".dropdown")) {
-                document.querySelectorAll(".dropdown-menu.is-open").forEach(menu => {
-                    menu.classList.remove("is-open");
-                    menu.previousElementSibling.setAttribute("aria-expanded", "false");
-                });
-            }
-        });
     }
 
     const templates = {
@@ -120,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <picture>
                                 <source srcset="imagens/gato-e-cachorro.webp" type="image/webp">
                                 <source srcset="imagens/gato-e-cachorro.jpg" type="image/jpeg">
-                                <img src="imagens/gato-e-cachorro.jpg" alt="Um cachorro e um gato sentados lado a lado." class="img-fluid rounded">
+                                <img src="imagens/gato-e-cachorro.jpg" alt="cachorro e um gato." class="img-fluid rounded">
                             </picture>
                         </div>
                         <div class="cta-text col-12 col-md-7">
@@ -143,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <picture>
                                     <source srcset="imagens/gatos-e-cachorros.webp" type="image/webp">
                                     <source srcset="imagens/gatos-e-cachorros.jpg" type="image/jpeg">
-                                    <img src="imagens/gatos-e-cachorros.jpg" alt="Voluntário segurando um filhote de cachorro resgatado." class="card-image">
+                                    <img src="imagens/gatos-e-cachorros.jpg" alt="Animal resgatado" class="card-image">
                                 </picture>
                                 <div class="card-body">
                                     <h3 class="card-title">Equipe de Resgate</h3>
@@ -158,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <picture>
                                     <source srcset="imagens/cachorro-gato-abraco.webp" type="image/webp">
                                     <source srcset="imagens/cachorro-gato-abraco.jpg" type="image/jpeg">
-                                    <img src="imagens/cachorro-gato-abraco.jpg" alt="Um cachorro e um gato abraçados confortavelmente em um canil." class="card-image">
+                                    <img src="imagens/cachorro-gato-abraco.jpg" alt="Cão e gato no abrigo" class="card-image">
                                 </picture>
                                 <div class="card-body">
                                     <h3 class="card-title">Cuidados no Abrigo</h3>
@@ -173,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <picture>
                                     <source srcset="imagens/gato-e-cachorro.webp" type="image/webp">
                                     <source srcset="imagens/gato-e-cachorro.jpg" type="image/jpeg">
-                                    <img src="imagens/gato-e-cachorro.jpg" alt="Pessoa interagindo com um cachorro em uma feira de adoção." class="card-image">
+                                    <img src="imagens/gato-e-cachorro.jpg" alt="Pessoa com animal" class="card-image">
                                 </picture>
                                 <div class="card-body">
                                     <h3 class="card-title">Feiras de Adoção</h3>
@@ -185,8 +193,9 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     </div>
                 </section>
+
                 <section id="doacao" class="page-section cta-section">
-                    <div id="modal-doacao" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+                    <div id="modal-doacao" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
                         <div class="modal-content">
                             <span class="modal-close" tabindex="0" aria-label="Fechar modal">&times;</span>
                             <h3 id="modal-title">Obrigado por sua doação!</h3>
@@ -219,7 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <div class="col-12 col-md-7">
                             <h2 class="section-title">Formulário de Voluntariado</h2>
                             <p class="section-subtitle">Preencha seus dados para entrarmos em contato.</p>
-                        
+                                
                             <div class="alert" id="form-feedback" style="display: none;" role="alert" aria-live="assertive"></div>
                         
                             <form id="form-cadastro" class="form-styled grid-container" novalidate>
@@ -272,8 +281,32 @@ document.addEventListener("DOMContentLoaded", () => {
                                         <select id="estado" name="estado" required>
                                             <option value="">Selecione...</option>
                                             <option value="AC">Acre</option>
+                                            <option value="AL">Alagoas</option>
+                                            <option value="AP">Amapá</option>
+                                            <option value="AM">Amazonas</option>
+                                            <option value="BA">Bahia</option>
+                                            <option value="CE">Ceará</option>
+                                            <option value="DF">Distrito Federal</option>
+                                            <option value="ES">Espírito Santo</option>
+                                            <option value="GO">Goiás</option>
+                                            <option value="MA">Maranhão</option>
+                                            <option value="MT">Mato Grosso</option>
+                                            <option value="MS">Mato Grosso do Sul</option>
+                                            <option value="MG">Minas Gerais</option>
+                                            <option value="PA">Pará</option>
+                                            <option value="PB">Paraíba</option>
+                                            <option value="PR">Paraná</option>
+                                            <option value="PE">Pernambuco</option>
+                                            <option value_comentarios="PI">Piauí</option>
+                                            <option value="RJ">Rio de Janeiro</option>
+                                            <option value="RN">Rio Grande do Norte</option>
+                                            <option value="RS">Rio Grande do Sul</option>
+                                            <option value="RO">Rondônia</option>
+                                            <option value="RR">Roraima</option>
+                                            <option value="SC">Santa Catarina</option>
                                             <option value="SP">São Paulo</option>
                                             <option value="SE">Sergipe</option>
+                                            <option value="TO">Tocantins</option>
                                         </select>
                                     </div>
                                 </fieldset>
@@ -287,7 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <picture>
                                 <source srcset="imagens/gato-voluntario.webp" type="image/webp">
                                 <source srcset="imagens/gato-voluntario.jpg" type="image/jpeg">
-                                <img src="imagens/gato-voluntario.jpg" alt="Um gato simpático olhando para a câmera, como se estivesse pronto para ser voluntário." class="img-fluid rounded shadow-lg">
+                                <img src="imagens/gato-voluntario.jpg" alt="Um gato simpático olhando para a câmera." class="img-fluid rounded shadow-lg">
                             </picture>
                         </div> 
                     </div> 
@@ -334,8 +367,6 @@ document.addEventListener("DOMContentLoaded", () => {
             initFormValidation();
         }
         
-        initDropdownNav();
-
         if (anchor) {
             const element = document.getElementById(anchor);
             if(element) {
@@ -349,24 +380,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateActiveNav(path) {
-        document.querySelectorAll(".main-nav .nav-link").forEach(link => {
+        document.querySelectorAll(".main-nav a").forEach(link => {
             link.classList.remove("active");
             
             const linkPath = new URL(link.href).hash; 
             
             if (path.startsWith(linkPath) && linkPath !== '#/') {
                  link.classList.add("active");
-            } else if (path === '#/' && linkPath === '#/') {
+            } else if ((path === '#/' || path === '') && linkPath === '#/') {
                  link.classList.add("active");
             }
         });
     }
-
-    window.addEventListener("hashchange", navigate);
-    
-    initMobileMenu();
-    initThemeToggle();
-    navigate(); 
 
     function initFormValidation() {
         const form = document.getElementById("form-cadastro");
@@ -391,7 +416,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 
                 form.querySelectorAll("[pattern]").forEach(input => {
-                    if (input.value) {
+                    if (input.value) { 
                         const pattern = new RegExp(input.pattern);
                         if (!pattern.test(input.value)) {
                             isValid = false;
@@ -416,7 +441,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     feedbackDiv.style.display = "block";
                     form.reset();
                 } else {
-                    feedbackDiv.innerHTML = "<strong>Ops! Encontramos alguns erros:</strong><ul>" + errorMessages.map(msg => `<li>${msg}</li>`).join('') + "</ul>";
+                    feedbackDiv.innerHTML = "<strong>Ops! Encontramos alguns erros:</strong><ul>" + 
+                                            errorMessages.map(msg => `<li>${msg}</li>`).join('') + 
+                                            "</ul>";
                     feedbackDiv.className = "alert alert-error";
                     feedbackDiv.style.display = "block";
                 }
@@ -435,9 +462,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const btnClose = modal.querySelector(".modal-close");
-        const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-        const firstFocusable = focusableElements[0] || btnClose;
-        const lastFocusable = focusableElements[focusableElements.length - 1] || btnClose;
+        const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"]), .modal-close');
+        const firstFocusable = focusableElements[0];
+        const lastFocusable = focusableElements[focusableElements.length - 1];
         let lastFocusedElement;
 
         const openModal = () => {
@@ -455,7 +482,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         };
 
-        modal.setAttribute("aria-hidden", "true");
         btnOpen.addEventListener("click", openModal);
         btnClose.addEventListener("click", closeModal);
 
@@ -485,5 +511,29 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     }
+
+    window.addEventListener("hashchange", navigate);
+    
+    initMobileMenu();
+    initThemeToggle();
+    initDropdownNav(); 
+    
+    navigate(); 
+
+    document.addEventListener("click", (e) => {
+        const mainNav = document.querySelector(".main-nav");
+        const menuToggle = document.getElementById("menu-toggle");
+
+        if (mainNav && mainNav.classList.contains("is-open")) {
+            if (!mainNav.contains(e.target) && !menuToggle.contains(e.target)) {
+                mainNav.classList.remove("is-open");
+                menuToggle.setAttribute("aria-expanded", "false");
+            }
+        }
+
+        if (!e.target.closest(".dropdown")) {
+            closeAllDropdowns(null); 
+        }
+    });
 
 });
